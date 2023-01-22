@@ -1,5 +1,6 @@
 #include "AccelerantRoster.h"
 
+#include <string.h>
 #include <dlfcn.h>
 #include <util/AVLTree.h>
 #include <sys/stat.h>
@@ -88,6 +89,8 @@ static void EnumPaths(void* arg, bool (*Callback)(const char* path, void* arg))
 }
 
 
+// #pragma mark - Accelerant
+
 void Accelerant::LastReferenceReleased()
 {
 	AccelerantHolder *holder = fHolder;
@@ -95,6 +98,26 @@ void Accelerant::LastReferenceReleased()
 	AccelerantRoster::Instance().Unregister(holder);
 }
 
+int32 Accelerant::AcquireReference()
+{
+	return BReferenceable::AcquireReference();
+}
+
+int32 Accelerant::ReleaseReference()
+{
+	return BReferenceable::ReleaseReference();
+}
+
+void *Accelerant::QueryInterface(const char *iface)
+{
+	if (strcmp(iface, B_ACCELERANT_IFACE_BASE) == 0) {
+		return static_cast<AccelerantBase*>(this);
+	}
+	return NULL;
+}
+
+
+// #pragma mark - AccelerantRoster
 
 AccelerantRoster::AccelerantRoster(AccelerantRosterPrivate& data): fPrivate(data)
 {

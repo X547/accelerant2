@@ -1,14 +1,24 @@
 #pragma once
 
+#include <SupportDefs.h>
+
+#ifdef __cplusplus
+
 #include <Referenceable.h>
-#include <GraphicsDefs.h>
 
 class BMessenger;
 class AccelerantHolder;
 class AccelerantRosterPrivate;
 
 
-class _EXPORT Accelerant: public BReferenceable {
+class _EXPORT AccelerantBase {
+public:
+	virtual int32 AcquireReference() = 0;
+	virtual int32 ReleaseReference() = 0;
+	virtual void *QueryInterface(const char *iface) = 0;
+};
+
+class _EXPORT Accelerant: public BReferenceable, public AccelerantBase {
 private:
 	friend class AccelerantRoster;
 	AccelerantHolder* fHolder{};
@@ -16,47 +26,17 @@ private:
 public:
 	virtual ~Accelerant() = default;
 	void LastReferenceReleased() override;
+
+	int32 AcquireReference() final;
+	int32 ReleaseReference() final;
+	void *QueryInterface(const char *iface) override;
 };
 
-class _EXPORT AccelerantDrm {
-public:
-	virtual ~AccelerantDrm() = default;
 
-	virtual void *DrmMmap(void *addr, size_t length, int prot, int flags, off_t offset) = 0;
-	virtual int DrmIoctl(unsigned long request, void *arg) = 0;
-};
+extern "C" {
 
-class _EXPORT AccelerantDisplay {
-public:
-	union CursorUpdateValid {
-		struct {
-			uint32 enabled: 1;
-			uint32 pos: 1;
-			uint32 org: 1;
-			uint32 buffer: 1;
-			uint32 format: 1;
-		};
-		uint32 val;
-	};
+status_t _EXPORT instantiate_accelerant(Accelerant **acc, int fd);
 
-	struct CursorUpdateInfo {
-		CursorUpdateValid valid;
-
-		bool enabled;
-		int32 x, y;
-		int32 orgX, orgY;
-
-		uint8 *buffer;
-
-		int32 bytesPerRow;
-		uint32 width, height;
-		color_space colorSpace;
-	};
-
-	virtual ~AccelerantDisplay() = default;
-
-	virtual status_t DisplayGetConsumer(int32 crtc, BMessenger &consumer) = 0;
-	virtual status_t DisplayUpdateCursor(int32 crtc, const CursorUpdateInfo &info) = 0;
 };
 
 
@@ -74,3 +54,17 @@ public:
 	static AccelerantRoster &Instance();
 	status_t FromFd(Accelerant *&acc, int fd);
 };
+
+#endif
+
+#define B_ACCELERANT_IFACE_BASE "base/v1"
+
+typedef struct accelerant_base {
+	struct accelerant_base_vtable *vt;
+} accelerant_base;
+
+typedef struct accelerant_base_vtable {
+	int32 (*AcquireReference)(accelerant_base *acc);
+	int32 (*ReleaseReference)(accelerant_base *acc);
+	void *(*QueryInterface)(accelerant_base *acc, const char *iface);
+} accelerant_base_vtable;

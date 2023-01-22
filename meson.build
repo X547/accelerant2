@@ -1,6 +1,6 @@
 project('accelerant2', 'cpp',
-	version : '0.1',
-	default_options : ['warning_level=3', 'cpp_std=c++2a']
+	version: '0.1',
+	default_options: ['warning_level=3', 'cpp_std=c++2a']
 )
 
 cpp = meson.get_compiler('cpp')
@@ -30,8 +30,11 @@ dep_libaccelerant = declare_dependency(
 )
 
 install_headers(
-  'AccelerantRoster.h',
-  subdir: 'accelerant',
+	'AccelerantRoster.h',
+	'AccelerantDrm.h',
+	'AccelerantDisplay.h',
+	'AccelerantAmdgpu.h',
+	subdir: 'accelerant',
 )
 
 pkg.generate(
