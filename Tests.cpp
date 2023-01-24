@@ -25,7 +25,7 @@ struct drm_version {
 static void CAccessTest(accelerant_base *accBase)
 {
 	printf("accBase: %p\n", accBase);
-	accelerant_drm *accDrm = (accelerant_drm*)accBase->vt->QueryInterface(accBase, B_ACCELERANT_IFACE_DRM);
+	accelerant_drm *accDrm = (accelerant_drm*)accBase->vt->QueryInterface(accBase, B_ACCELERANT_IFACE_DRM, 0);
 	printf("accDrm: %p\n", accDrm);
 
 	char drmName[256];

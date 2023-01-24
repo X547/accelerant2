@@ -93,6 +93,7 @@ static void EnumPaths(void* arg, bool (*Callback)(const char* path, void* arg))
 
 void Accelerant::LastReferenceReleased()
 {
+	printf("Accelerant::LastReferenceReleased()\n");
 	AccelerantHolder *holder = fHolder;
 	delete this;
 	AccelerantRoster::Instance().Unregister(holder);
@@ -108,9 +109,9 @@ int32 Accelerant::ReleaseReference()
 	return BReferenceable::ReleaseReference();
 }
 
-void *Accelerant::QueryInterface(const char *iface)
+void *Accelerant::QueryInterface(const char *iface, uint32 version)
 {
-	if (strcmp(iface, B_ACCELERANT_IFACE_BASE) == 0) {
+	if (strcmp(iface, B_ACCELERANT_IFACE_BASE) == 0 && version <= 0) {
 		return static_cast<AccelerantBase*>(this);
 	}
 	return NULL;
@@ -193,7 +194,7 @@ status_t AccelerantRoster::FromFd(Accelerant *&acc, int fd)
 	BReference<Accelerant> accDeleter;
 	void *addon{};
 	CheckRet(Load(acc, addon, fd));
-	accDeleter.SetTo(acc, false);
+	accDeleter.SetTo(acc, true);
 	holder = new(std::nothrow) AccelerantHolder{
 		.fFd = dup(fd),
 		.fKey = key,

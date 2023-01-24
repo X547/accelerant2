@@ -15,7 +15,7 @@ class _EXPORT AccelerantBase {
 public:
 	virtual int32 AcquireReference() = 0;
 	virtual int32 ReleaseReference() = 0;
-	virtual void *QueryInterface(const char *iface) = 0;
+	virtual void *QueryInterface(const char *iface, uint32 version) = 0;
 };
 
 class _EXPORT Accelerant: public BReferenceable, public AccelerantBase {
@@ -29,7 +29,7 @@ public:
 
 	int32 AcquireReference() final;
 	int32 ReleaseReference() final;
-	void *QueryInterface(const char *iface) override;
+	void *QueryInterface(const char *iface, uint32 version) override;
 };
 
 
@@ -66,5 +66,5 @@ typedef struct accelerant_base {
 typedef struct accelerant_base_vtable {
 	int32 (*AcquireReference)(accelerant_base *acc);
 	int32 (*ReleaseReference)(accelerant_base *acc);
-	void *(*QueryInterface)(accelerant_base *acc, const char *iface);
+	void *(*QueryInterface)(accelerant_base *acc, const char *iface, uint32 version);
 } accelerant_base_vtable;

@@ -5,12 +5,14 @@
 
 #define B_ACCELERANT_IFACE_DRM "drm/v1"
 
+struct drm_version;
+
 #ifdef __cplusplus
 
 class _EXPORT AccelerantDrm {
 public:
 	virtual void *DrmMmap(void *addr, size_t length, int prot, int flags, off_t offset) = 0;
-	virtual int DrmIoctl(unsigned long request, void *arg) = 0;
+	virtual int DrmIoctl(uint32_t request, void *arg) = 0;
 
 	virtual int DrmVersion(struct drm_version *version) = 0;
 
