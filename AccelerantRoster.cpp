@@ -4,7 +4,7 @@
 #include <dlfcn.h>
 #include <util/AVLTree.h>
 #include <sys/stat.h>
-#include <Path.h>
+#include <String.h>
 #include <FindDirectory.h>
 #include <graphic_driver.h>
 #include <AutoDeleterPosix.h>
@@ -70,25 +70,6 @@ struct AccelerantRosterPrivate {
 };
 
 
-static void EnumPaths(void* arg, bool (*Callback)(const char* path, void* arg))
-{
-	const static directory_which vols[] = {
-		B_USER_NONPACKAGED_ADDONS_DIRECTORY,
-		B_USER_ADDONS_DIRECTORY,
-		B_SYSTEM_NONPACKAGED_ADDONS_DIRECTORY,
-		B_SYSTEM_ADDONS_DIRECTORY,
-	};
-	char path[PATH_MAX];
-	getcwd(path, PATH_MAX);
-	for(size_t i = 0; i < B_COUNT_OF(vols); i++) {
-		if (find_directory(vols[i], -1, false, path, PATH_MAX) != B_OK) {
-			continue;
-		}
-		if (Callback(path, arg)) return;
-	}
-}
-
-
 // #pragma mark - Accelerant
 
 void Accelerant::LastReferenceReleased()
@@ -147,30 +128,27 @@ status_t AccelerantRoster::Load(Accelerant *&acc, void *&outAddon, int fd)
 
 	status_t res = B_ERROR;
 
-	auto enumPathsCallback = [&] (const char* path, void* arg) {
-		BPath addonPath(path);
-		addonPath.Append("accelerants");
-		addonPath.Append(signature);
-		printf("path: \"%s\"\n", addonPath.Path());
+	BString subPath;
+	subPath.SetToFormat("accelerants/%s", signature);
+	char** paths;
+	size_t pathCount;
+	CheckRet(find_paths(B_FIND_PATH_ADD_ONS_DIRECTORY, subPath.String(), &paths, &pathCount));
+	MemoryDeleter pathArrayDeleter(paths);
 
-		CObjectDeleter<void, int, dlclose> addon(dlopen(addonPath.Path(), 0));
+	for(size_t i = 0; i < pathCount; i++) {
+		printf("path: \"%s\"\n", paths[i]);
+		CObjectDeleter<void, int, dlclose> addon(dlopen(paths[i], 0));
 		if (!addon.IsSet())
-			return false;
+			continue;
 		auto instantiate = (status_t (*)(Accelerant **acc, int fd))dlsym(addon.Get(), "instantiate_accelerant");
 		if (instantiate == NULL)
-			return false;
+			continue;
 		res = instantiate(&acc, fd);
 		if (res < B_OK)
-			return false;
+			continue;
 		outAddon = addon.Detach();
-		res = B_OK;
-		return true;
-	};
-
-	EnumPaths(&enumPathsCallback, [] (const char* path, void* arg) {
-		return (*(decltype(enumPathsCallback)*)arg)(path, arg);
-	});
-
+		return B_OK;
+	}
 	return res;
 }
 
