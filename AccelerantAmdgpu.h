@@ -16,8 +16,8 @@ public:
 	virtual int AmdgpuBoSetMetadata(uint32_t bo, struct amdgpu_bo_metadata *info) = 0;
 	virtual int AmdgpuBoVaOpRaw(uint32_t bo, uint64_t offset, uint64_t size, uint64_t addr, uint64_t flags, uint32_t ops) = 0;
 	virtual int AmdgpuBoCpuMap(uint32_t bo, void **cpu) = 0;
-	virtual int AmdgpuCsSubmitRaw(uint32_t context_id, uint32_t bo_list_handle, int num_chunks, struct drm_amdgpu_cs_chunk *chunks, uint64_t *seq_no) = 0;
-	virtual int AmdgpuWaitCs(uint32_t ctx_id, unsigned ip, unsigned ip_instance, uint32_t ring, uint64_t handle, uint64_t timeout_ns, bool *busy) = 0;
+	virtual int AmdgpuCsSubmitRaw(uint32_t context_id, uint32_t bo_list_handle, uint32_t num_chunks, struct drm_amdgpu_cs_chunk *chunks, uint64_t *seq_no) = 0;
+	virtual int AmdgpuWaitCs(uint32_t ctx_id, uint32_t ip, uint32_t ip_instance, uint32_t ring, uint64_t handle, uint64_t timeout_ns, bool *busy) = 0;
 	virtual int AmdgpuCtxRaw(union drm_amdgpu_ctx *args) = 0;
 };
 
@@ -35,7 +35,7 @@ typedef struct accelerant_amdgpu_vtable {
 	int (*AmdgpuBoSetMetadata)(accelerant_amdgpu *acc, uint32_t bo, struct amdgpu_bo_metadata *info);
 	int (*AmdgpuBoVaOpRaw)(accelerant_amdgpu *acc, uint32_t bo, uint64_t offset, uint64_t size, uint64_t addr, uint64_t flags, uint32_t ops);
 	int (*AmdgpuBoCpuMap)(accelerant_amdgpu *acc, uint32_t bo, void **cpu);
-	int (*AmdgpuCsSubmitRaw)(accelerant_amdgpu *acc, uint32_t context_id, uint32_t bo_list_handle, int num_chunks, struct drm_amdgpu_cs_chunk *chunks, uint64_t *seq_no);
-	int (*AmdgpuWaitCs)(accelerant_amdgpu *acc, uint32_t ctx_id, unsigned ip, unsigned ip_instance, uint32_t ring, uint64_t handle, uint64_t timeout_ns, bool *busy);
+	int (*AmdgpuCsSubmitRaw)(accelerant_amdgpu *acc, uint32_t context_id, uint32_t bo_list_handle, uint32_t num_chunks, struct drm_amdgpu_cs_chunk *chunks, uint64_t *seq_no);
+	int (*AmdgpuWaitCs)(accelerant_amdgpu *acc, uint32_t ctx_id, uint32_t ip, uint32_t ip_instance, uint32_t ring, uint64_t handle, uint64_t timeout_ns, bool *busy);
 	int (*AmdgpuCtxRaw)(accelerant_amdgpu *acc, union drm_amdgpu_ctx *args);
 } accelerant_amdgpu_vtable;
